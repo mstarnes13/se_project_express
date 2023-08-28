@@ -1,7 +1,10 @@
 const router = require("express").Router();
 
-const { createItem, getItems, deleteItem } = require("../controllers/clothingItem");
-
+const {
+  createItem,
+  getItems,
+  deleteItem,
+} = require("../controllers/clothingItem");
 
 // CRUD
 
@@ -14,6 +17,6 @@ router.get("/", getItems);
 
 // Delete
 
-router.delete('/:itemId', deleteItem)
+router.delete("/:itemId", deleteItem);
 
 module.exports = router;

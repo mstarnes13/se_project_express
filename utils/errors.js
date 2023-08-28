@@ -3,7 +3,7 @@ class CastError extends Error {
     super(message);
     this.name = "CastError";
     this.statusCode = 400;
-    this.message = ({message: "Cast Error"});
+    this.message = "Cast Error";
   }
 }
 
@@ -12,7 +12,7 @@ class NotFoundError extends Error {
     super(message);
     this.name = "NotFoundError";
     this.statusCode = 404;
-    this.message = ({message: "Not Found"});
+    this.message = "Not Found";
   }
 }
 
@@ -21,7 +21,7 @@ class ServerError extends Error {
     super(message);
     this.name = "ServerError";
     this.statusCode = 500;
-    this.message = ({message: "Server Error"});
+    this.message = "Server Error";
   }
 }
 
@@ -30,12 +30,8 @@ class ValidationError extends Error {
     super(message);
     this.name = "ValidationError";
     this.statusCode = 400;
-    this.message = ({message: "Validation Error"});
+    this.message = "Validation Error";
   }
 }
 
-
-module.exports = { ValidationError, ServerError, NotFoundError, CastError};
-
-
-
+module.exports = { ValidationError, ServerError, NotFoundError, CastError };

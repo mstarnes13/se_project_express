@@ -27,9 +27,7 @@ const createItem = (req, res) => {
           .send(validationError.message);
       }
       const serverError = new ServerError();
-      return res
-        .status(serverError.statusCode)
-        .send(serverError.message);
+      return res.status(serverError.statusCode).send(serverError.message);
     });
 };
 
@@ -40,44 +38,30 @@ const getItems = (req, res) => {
     .catch((e) => {
       console.log(e);
       const serverError = new ServerError();
-      return res
-        .status(serverError.statusCode)
-        .send(serverError.message);
+      return res.status(serverError.statusCode).send(serverError.message);
     });
 };
-
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
   console.log(itemId);
 
   ClothingItem.findByIdAndDelete(itemId)
-  .orFail(() => new NotFoundError())
-  .then(() =>
-    res
-      .status(200)
-      .send({ message: "item deleted" })
-  ).catch((e) => {
-    if (e.name === "CastError") {
-      const castError = new CastError();
-      return res
-        .status(castError.statusCode)
-        .send( castError.message);
-    }
-    if (e.name && e.name === "NotFoundError") {
-      const notFoundError = new NotFoundError();
-      return res
-        .status(notFoundError.statusCode)
-        .send( notFoundError.message);
-    }
+    .orFail(() => new NotFoundError())
+    .then(() => res.status(200).send({ message: "item deleted" }))
+    .catch((e) => {
+      if (e.name === "CastError") {
+        const castError = new CastError();
+        return res.status(castError.statusCode).send(castError.message);
+      }
+      if (e.name && e.name === "NotFoundError") {
+        const notFoundError = new NotFoundError();
+        return res.status(notFoundError.statusCode).send(notFoundError.message);
+      }
       const serverError = new ServerError();
-      return res
-        .status(serverError.statusCode)
-        .send(serverError.message);
-  });
-}
-
-
+      return res.status(serverError.statusCode).send(serverError.message);
+    });
+};
 
 module.exports = {
   createItem,
