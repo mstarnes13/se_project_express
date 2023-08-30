@@ -1,8 +1,8 @@
 const ClothingItem = require("../models/clothingItem");
-const { ValidationError } = require("../utils/errors");
-const { NotFoundError } = require("../utils/errors");
-const { CastError } = require("../utils/errors");
-const { ServerError } = require("../utils/errors");
+const { ValidationError } = require("../utils/ValidationError");
+const { NotFoundError } = require("../utils/NotFoundError");
+const { CastError } = require("../utils/CastError");
+const { ServerError } = require("../utils/ServerError");
 
 module.exports.likeItem = (req, res) =>
   ClothingItem.findByIdAndUpdate(
@@ -20,12 +20,7 @@ module.exports.likeItem = (req, res) =>
           .status(castError.statusCode)
           .send({ message: castError.message });
       }
-      if (e.name && e.name === "ValidationError") {
-        const validationError = new ValidationError();
-        return res
-          .status(validationError.statusCode)
-          .send({ message: validationError.message });
-      }
+      
       if (e.name && e.name === "NotFoundError") {
         const notFoundError = new NotFoundError();
         return res
@@ -50,18 +45,13 @@ module.exports.dislikeItem = (req, res) =>
       console.log(e);
       if (e.name && e.name === "CastError") {
         const castError = new CastError();
-        return res.status(castError.statusCode).send(castError.message);
+        return res.status(castError.statusCode).send({message: "Cast Error" });
       }
-      if (e.name && e.name === "ValidationError") {
-        const validationError = new ValidationError();
-        return res
-          .status(validationError.statusCode)
-          .send(validationError.message);
-      }
+
       if (e.name && e.name === "NotFoundError") {
         const notFoundError = new NotFoundError();
-        return res.status(notFoundError.statusCode).send(notFoundError.message);
+        return res.status(notFoundError.statusCode).send({message: "Not Found" });
       }
       const serverError = new ServerError();
-      return res.status(serverError.statusCode).send(serverError.message);
+      return res.status(serverError.statusCode).send({message: "Server Error" });
     });

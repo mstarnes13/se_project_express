@@ -1,8 +1,8 @@
 const ClothingItem = require("../models/clothingItem");
-const { ValidationError } = require("../utils/errors");
-const { NotFoundError } = require("../utils/errors");
-const { CastError } = require("../utils/errors");
-const { ServerError } = require("../utils/errors");
+const { ValidationError } = require("../utils/ValidationError");
+const { NotFoundError } = require("../utils/NotFoundError");
+const { CastError } = require("../utils/CastError");
+const { ServerError } = require("../utils/ServerError");
 
 const createItem = (req, res) => {
   // console.log(req);

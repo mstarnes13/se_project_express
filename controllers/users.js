@@ -1,8 +1,8 @@
 const User = require("../models/user");
-const { ValidationError } = require("../utils/errors");
-const { NotFoundError } = require("../utils/errors");
-const { CastError } = require("../utils/errors");
-const { ServerError } = require("../utils/errors");
+const { ValidationError } = require("../utils/ValidationError");
+const { NotFoundError } = require("../utils/NotFoundError");
+const { CastError } = require("../utils/CastError");
+const { ServerError } = require("../utils/ServerError");
 
 // get Users
 const getUsers = (req, res) => {
@@ -12,7 +12,7 @@ const getUsers = (req, res) => {
     .catch((e) => {
       console.log(e);
       const serverError = new ServerError();
-      return res.status(serverError.statusCode).send(serverError.message);
+      return res.status(serverError.statusCode).send({message: "Server Error"});
     });
 };
 
@@ -27,15 +27,15 @@ const getUser = (req, res) => {
       console.log(e);
       if (e.name && e.name === "CastError") {
         const castError = new CastError();
-        return res.status(castError.statusCode).send(castError.message);
+        return res.status(castError.statusCode).send({message: "Cast Error"});
       }
       if (e.name && e.name === "NotFoundError") {
         console.log("throwing a NotFoundError");
         const notFoundError = new NotFoundError();
-        return res.status(notFoundError.statusCode).send(notFoundError.message);
+        return res.status(notFoundError.statusCode).send({message: "Not Found"});
       }
       const serverError = new ServerError();
-      return res.status(serverError.statusCode).send(serverError.message);
+      return res.status(serverError.statusCode).send({message: "Server Error"});
     });
 };
 
@@ -60,7 +60,7 @@ const createUser = (req, res) => {
           .send(validationError.message);
       }
       const serverError = new ServerError();
-      return res.status(serverError.statusCode).send(serverError.message);
+      return res.status(serverError.statusCode).send({message: "Server Error"});
     });
 };
 
