@@ -12,7 +12,9 @@ const getUsers = (req, res) => {
     .catch((e) => {
       console.log(e);
       const serverError = new ServerError();
-      return res.status(serverError.statusCode).send({message: "Server Error"});
+      return res
+        .status(serverError.statusCode)
+        .send({ message: "Server Error" });
     });
 };
 
@@ -27,15 +29,19 @@ const getUser = (req, res) => {
       console.log(e);
       if (e.name && e.name === "CastError") {
         const castError = new CastError();
-        return res.status(castError.statusCode).send({message: "Cast Error"});
+        return res.status(castError.statusCode).send({ message: "Cast Error" });
       }
       if (e.name && e.name === "NotFoundError") {
         console.log("throwing a NotFoundError");
         const notFoundError = new NotFoundError();
-        return res.status(notFoundError.statusCode).send({message: "Not Found"});
+        return res
+          .status(notFoundError.statusCode)
+          .send({ message: "Not Found" });
       }
       const serverError = new ServerError();
-      return res.status(serverError.statusCode).send({message: "Server Error"});
+      return res
+        .status(serverError.statusCode)
+        .send({ message: "Server Error" });
     });
 };
 
@@ -57,10 +63,12 @@ const createUser = (req, res) => {
         const validationError = new ValidationError();
         return res
           .status(validationError.statusCode)
-          .send(validationError.message);
+          .send({ message: validationError.message });
       }
       const serverError = new ServerError();
-      return res.status(serverError.statusCode).send({message: "Server Error"});
+      return res
+        .status(serverError.statusCode)
+        .send({ message: serverError.message });
     });
 };
 

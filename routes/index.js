@@ -12,6 +12,8 @@ router.use("/items", like);
 
 router.use((req, res) => {
   const notFoundError = new NotFoundError();
-  return res.status(notFoundError.statusCode).send(notFoundError.message);
+  return res
+    .status(notFoundError.statusCode)
+    .send({ message: notFoundError.message });
 });
 module.exports = router;

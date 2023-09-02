@@ -24,10 +24,12 @@ const createItem = (req, res) => {
         const validationError = new ValidationError();
         return res
           .status(validationError.statusCode)
-          .send(validationError.message);
+          .send({ message: validationError.message });
       }
       const serverError = new ServerError();
-      return res.status(serverError.statusCode).send(serverError.message);
+      return res
+        .status(serverError.statusCode)
+        .send({ message: serverError.message });
     });
 };
 
@@ -38,7 +40,9 @@ const getItems = (req, res) => {
     .catch((e) => {
       console.log(e);
       const serverError = new ServerError();
-      return res.status(serverError.statusCode).send(serverError.message);
+      return res
+        .status(serverError.statusCode)
+        .send({ message: serverError.message });
     });
 };
 
@@ -52,14 +56,20 @@ const deleteItem = (req, res) => {
     .catch((e) => {
       if (e.name === "CastError") {
         const castError = new CastError();
-        return res.status(castError.statusCode).send(castError.message);
+        return res
+          .status(castError.statusCode)
+          .send({ message: castError.message });
       }
       if (e.name && e.name === "NotFoundError") {
         const notFoundError = new NotFoundError();
-        return res.status(notFoundError.statusCode).send(notFoundError.message);
+        return res
+          .status(notFoundError.statusCode)
+          .send({ message: notFoundError.message });
       }
       const serverError = new ServerError();
-      return res.status(serverError.statusCode).send(serverError.message);
+      return res
+        .status(serverError.statusCode)
+        .send({ message: serverError.message });
     });
 };
 
