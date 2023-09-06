@@ -10,6 +10,10 @@ router.use("/users", user);
 
 router.use("/items", like);
 
+router.post("/signin", login);
+
+router.post ("/signup", createUser);
+
 router.use((req, res) => {
   const notFoundError = new NotFoundError();
   return res
