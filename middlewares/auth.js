@@ -2,7 +2,6 @@ const { JWT_SECRET } = require("../utils/config");
 const jwt = require("jsonwebtoken");
 
 module.exports = (req, res, next) => {
-  // getting authorization from the header
   const { authorization } = req.headers;
 
   // let's check the header exists and starts with 'Bearer '
