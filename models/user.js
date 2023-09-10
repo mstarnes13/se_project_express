@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
+const auth = require("../middlewares/auth");
 
 const user = new mongoose.Schema({
   name: {
@@ -31,12 +32,11 @@ const user = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    minlength: 8,
     select: false,
   },
 });
 
-userSchema.statics.findUserByCredentials = (email, password) => {
+user.statics.findUserByCredentials = function findUserByCredentials(email, password,){
   return this.findOne({ email })
     .select("+password")
     .then((user) => {
@@ -54,4 +54,4 @@ userSchema.statics.findUserByCredentials = (email, password) => {
     });
 };
 
-module.exports = mongoose.model("users", user);
+module.exports = mongoose.model("user", user);

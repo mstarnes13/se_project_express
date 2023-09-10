@@ -3,6 +3,7 @@ const { ValidationError } = require("../utils/errors/ValidationError");
 const { NotFoundError } = require("../utils/errors/NotFoundError");
 const { CastError } = require("../utils/errors/CastError");
 const { ServerError } = require("../utils/errors/ServerError");
+const auth = require("../middlewares/auth");
 
 const createItem = (req, res) => {
   console.log(req.body);

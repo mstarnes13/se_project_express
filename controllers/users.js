@@ -9,56 +9,56 @@ const { DuplicateError } = require("../utils/errors/DuplicateError");
 const { JWT_SECRET } = require("../utils/config");
 
 // get Users
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.status(200).send(users))
-    .catch((e) => {
-      console.log(e);
-      const serverError = new ServerError();
-      return res
-        .status(serverError.statusCode)
-        .send({ message: "Server Error" });
-    });
-};
+// const getUsers = (req, res) => {
+//   User.find({})
+//     .then((users) => res.status(200).send(users))
+//     .catch((e) => {
+//       console.log(e);
+//       const serverError = new ServerError();
+//       return res
+//         .status(serverError.statusCode)
+//         .send({ message: "Server Error" });
+//     });
+// };
 
 // get User
-const getUser = (req, res) => {
-  const { userId } = req.params;
+// const getUser = (req, res) => {
+//   const { userId } = req.params;
 
-  User.findById(userId)
-    .orFail(() => new NotFoundError())
-    .then((user) => res.status(200).send({ data: user }))
-    .catch((e) => {
-      console.log(e);
-      if (e.name && e.name === "CastError") {
-        const castError = new CastError();
-        return res.status(castError.statusCode).send({ message: "Cast Error" });
-      }
-      if (e.name && e.name === "NotFoundError") {
-        console.log("throwing a NotFoundError");
-        const notFoundError = new NotFoundError();
-        return res
-          .status(notFoundError.statusCode)
-          .send({ message: "Not Found" });
-      }
-      const serverError = new ServerError();
-      return res
-        .status(serverError.statusCode)
-        .send({ message: "Server Error" });
-    });
-};
+//   User.findById(userId)
+//     .orFail(() => new NotFoundError())
+//     .then((user) => res.status(200).send({ data: user }))
+//     .catch((e) => {
+//       console.log(e);
+//       if (e.name && e.name === "CastError") {
+//         const castError = new CastError();
+//         return res.status(castError.statusCode).send({ message: "Cast Error" });
+//       }
+//       if (e.name && e.name === "NotFoundError") {
+//         console.log("throwing a NotFoundError");
+//         const notFoundError = new NotFoundError();
+//         return res
+//           .status(notFoundError.statusCode)
+//           .send({ message: "Not Found" });
+//       }
+//       const serverError = new ServerError();
+//       return res
+//         .status(serverError.statusCode)
+//         .send({ message: "Server Error" });
+//     });
+// };
 
 // create User
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
   User.findOne({ email }).then((emailFound) => {
     if (emailFound) {
       res
-        .status(DuplicateError.statusCode)
+        .status(400)
         .send({ message: "User already exists" });
     } else {
       bcrypt
-        .hash(req.body.password, 10)
+        .hash(password, 10)
         .then((hash) => User.create({ name, avatar, email, password: hash }))
         .then((user) => {
           res.send({ name, avatar, email, _id: user._id });
@@ -82,7 +82,7 @@ const createUser = (req, res) => {
 
 //login
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findUserByCredentials(email, password)
@@ -107,7 +107,7 @@ const login = (req, res) => {
     });
 };
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   const { userId } = req.params;
 
   User.findById(userId)
@@ -161,8 +161,6 @@ const updateCurrentUser = (req, res) => {
 };
 
 module.exports = {
-  getUsers,
-  getUser,
   createUser,
   getCurrentUser,
   updateCurrentUser,
