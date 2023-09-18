@@ -1,88 +1,26 @@
 const bcrypt = require("bcryptjs");
-const User = require("../models/user");
 const jwt = require("jsonwebtoken");
-const { ValidationError } = require("../utils/errors/ValidationError");
-const { NotFoundError } = require("../utils/errors/NotFoundError");
-const { CastError } = require("../utils/errors/CastError");
-const { ServerError } = require("../utils/errors/ServerError");
-const { DuplicateError } = require("../utils/errors/DuplicateError");
+const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
+const handleErrors = require("../utils/handleErrors");
 
-// get Users
-// const getUsers = (req, res) => {
-//   User.find({})
-//     .then((users) => res.status(200).send(users))
-//     .catch((e) => {
-//       console.log(e);
-//       const serverError = new ServerError();
-//       return res
-//         .status(serverError.statusCode)
-//         .send({ message: "Server Error" });
-//     });
-// };
-
-// get User
-// const getUser = (req, res) => {
-//   const { userId } = req.params;
-
-//   User.findById(userId)
-//     .orFail(() => new NotFoundError())
-//     .then((user) => res.status(200).send({ data: user }))
-//     .catch((e) => {
-//       console.log(e);
-//       if (e.name && e.name === "CastError") {
-//         const castError = new CastError();
-//         return res.status(castError.statusCode).send({ message: "Cast Error" });
-//       }
-//       if (e.name && e.name === "NotFoundError") {
-//         console.log("throwing a NotFoundError");
-//         const notFoundError = new NotFoundError();
-//         return res
-//           .status(notFoundError.statusCode)
-//           .send({ message: "Not Found" });
-//       }
-//       const serverError = new ServerError();
-//       return res
-//         .status(serverError.statusCode)
-//         .send({ message: "Server Error" });
-//     });
-// };
-
-// create User
-const createUser = (req, res, next) => {
+const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
-  User.findOne({ email }).then((emailFound) => {
-    if (emailFound) {
-      res
-        .status(400)
-        .send({ message: "User already exists" });
-    } else {
-      bcrypt
-        .hash(password, 10)
-        .then((hash) => User.create({ name, avatar, email, password: hash }))
-        .then((user) => {
-          res.send({ name, avatar, email, _id: user._id });
-        })
-        .catch((e) => {
-          if (e.name && e.name === "ValidationError") {
-            console.log(ValidationError);
-            const validationError = new ValidationError();
-            return res
-              .status(validationError.statusCode)
-              .send({ message: validationError.message });
-          }
-          const serverError = new ServerError();
-          return res
-            .status(serverError.statusCode)
-            .send({ message: serverError.message });
-        });
-    }
-  });
+
+  bcrypt.hash(password, 10).then((hash) =>
+    User.create({ name, avatar, email, password: hash })
+      .then((user) => {
+        const userData = user.toObject();
+        delete userData.password;
+        res.status(200).send({ userData });
+      })
+      .catch((err) => {
+        handleErrors(req, res, err);
+      }),
+  );
 };
 
-//login
-
-const login = (req, res, next) => {
+const login = (req, res) => {
   const { email, password } = req.body;
 
   User.findUserByCredentials(email, password)
@@ -92,43 +30,21 @@ const login = (req, res, next) => {
       });
       res.send({ token });
     })
-    .catch((e) => {
-      if (e.name && e.name === "ValidationError") {
-        console.log(ValidationError);
-        const validationError = new ValidationError();
-        return res
-          .status(validationError.statusCode)
-          .send({ message: validationError.message });
-      }
-      const serverError = new ServerError();
-      return res
-        .status(serverError.statusCode)
-        .send({ message: serverError.message });
+    .catch((err) => {
+      handleErrors(req, res, err);
     });
 };
 
-const getCurrentUser = (req, res, next) => {
-  const { userId } = req.params;
+const getCurrentUser = (req, res) => {
+  const { userId } = req.user._id;
 
   User.findById(userId)
-    .orFail(() => new NotFoundError())
-    .then((user) => res.status(200).send({ data: user }))
-    .catch((e) => {
-      console.log(e);
-      if (e.name && e.name === "CastError") {
-        const castError = new CastError();
-        return res.status(castError.statusCode).send({ message: "Cast Error" });
-      }
-      if (e.name && e.name === "NotFoundError") {
-        const notFoundError = new NotFoundError();
-        return res
-          .status(notFoundError.statusCode)
-          .send({ message: "Not Found" });
-      }
-      const serverError = new ServerError();
-      return res
-        .status(serverError.statusCode)
-        .send({ message: "Server Error" });
+    .orFail()
+    .then((user) => {
+      res.status(200).send({ data: user });
+    })
+    .catch((err) => {
+      handleErrors(req, res, err);
     });
 };
 
@@ -140,23 +56,11 @@ const updateCurrentUser = (req, res) => {
     { new: true, runValidators: true },
   )
     .orFail()
-    .then((user) => res.status(200).send({ data: user }))
-    .catch((e) => {
-      console.log(e);
-      if (e.name && e.name === "CastError") {
-        const castError = new CastError();
-        return res.status(castError.statusCode).send({ message: "Cast Error" });
-      }
-      if (e.name && e.name === "NotFoundError") {
-        const notFoundError = new NotFoundError();
-        return res
-          .status(notFoundError.statusCode)
-          .send({ message: "Not Found" });
-      }
-      const serverError = new ServerError();
-      return res
-        .status(serverError.statusCode)
-        .send({ message: "Server Error" });
+    .then((user) => {
+      res.status(200).send({ data: user });
+    })
+    .catch((err) => {
+      handleErrors(req, res, err);
     });
 };
 

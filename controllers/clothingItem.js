@@ -1,9 +1,5 @@
 const ClothingItem = require("../models/clothingItem");
-const { ValidationError } = require("../utils/errors/ValidationError");
-const { NotFoundError } = require("../utils/errors/NotFoundError");
-const { CastError } = require("../utils/errors/CastError");
-const { ServerError } = require("../utils/errors/ServerError");
-const auth = require("../middlewares/auth");
+const handleErrors = require("../utils/handleErrors");
 
 const createItem = (req, res) => {
   console.log(req.body);
@@ -16,18 +12,8 @@ const createItem = (req, res) => {
       console.log(req.user._id);
       res.send({ data: item });
     })
-    .catch((e) => {
-      console.log(e);
-      if (e.name === "ValidationError") {
-        const validationError = new ValidationError();
-        return res
-          .status(validationError.statusCode)
-          .send({ message: validationError.message });
-      }
-      const serverError = new ServerError();
-      return res
-        .status(serverError.statusCode)
-        .send({ message: serverError.message });
+    .catch((err) => {
+      handleErrors(req, res, err);
     });
 };
 
@@ -35,12 +21,8 @@ const getItems = (req, res) => {
   console.log(req);
   ClothingItem.find({})
     .then((items) => res.status(200).send(items))
-    .catch((e) => {
-      console.log(e);
-      const serverError = new ServerError();
-      return res
-        .status(serverError.statusCode)
-        .send({ message: serverError.message });
+    .catch((err) => {
+      handleErrors(req, res, err);
     });
 };
 
@@ -49,35 +31,24 @@ const deleteItem = (req, res) => {
   console.log(itemId);
 
   ClothingItem.findById(itemId)
-    .orFail(() => new NotFoundError())
+    .orFail()
     .then((item) => {
-      if (!item.owner.equals(req.user._id)) {
-        const forbiddenError = new ForbiddenError();
-        return res
-          .status(forbiddenError.statusCode)
-          .send({ message: "Cannot Delete Item" });
+      if (String(item.owner) !== req.user._id) {
+        throw Error("Cannot delete item");
       }
-      return ClothingItem.findByIdAndDelete(itemId)
-        .orFail(() => new NotFoundError())
-        .then(() => res.status(200).send({ message: "item deleted" }))
-        .catch((e) => {
-          if (e.name === "CastError") {
-            const castError = new CastError();
-            return res
-              .status(castError.statusCode)
-              .send({ message: castError.message });
-          }
-          if (e.name && e.name === "NotFoundError") {
-            const notFoundError = new NotFoundError();
-            return res
-              .status(notFoundError.statusCode)
-              .send({ message: notFoundError.message });
-          }
-          const serverError = new ServerError();
-          return res
-            .status(serverError.statusCode)
-            .send({ message: serverError.message });
+
+      ClothingItem.findByIdAndDelete(item._id)
+        .orFail()
+        .then(() => {
+          res.status(200).send({ message: "item deleted" });
+        })
+        .catch((err) => {
+          handleErrors(req, res, err);
         });
+    })
+
+    .catch((err) => {
+      handleErrors(req, res, err);
     });
 };
 
