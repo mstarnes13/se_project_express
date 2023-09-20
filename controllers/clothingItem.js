@@ -1,5 +1,6 @@
 const ClothingItem = require("../models/clothingItem");
-const handleErrors = require("../utils/handleErrors");
+const { handleErrors } = require("../utils/handleErrors");
+const { ERROR_403 } = require("../utils/errors");
 
 const createItem = (req, res) => {
   console.log(req.body);
@@ -20,8 +21,11 @@ const createItem = (req, res) => {
 const getItems = (req, res) => {
   console.log(req);
   ClothingItem.find({})
-    .then((items) => res.status(200).send(items))
+    .then((items) => {
+      res.send({ data: items });
+    })
     .catch((err) => {
+      console.error(err);
       handleErrors(req, res, err);
     });
 };
@@ -33,21 +37,25 @@ const deleteItem = (req, res) => {
   ClothingItem.findById(itemId)
     .orFail()
     .then((item) => {
-      if (String(item.owner) !== req.user._id) {
-        throw Error("Cannot delete item");
-      }
+      const itemOwner = item.owner.toString();
 
-      ClothingItem.findByIdAndDelete(item._id)
-        .orFail()
-        .then(() => {
-          res.status(200).send({ message: "item deleted" });
-        })
-        .catch((err) => {
-          handleErrors(req, res, err);
-        });
+      if (req.user._id !== itemOwner) {
+        res.status(ERROR_403).send({ message: "Item cannot be deleted" });
+      } else {
+        ClothingItem.findByIdAndDelete(itemId)
+          .orFail()
+          .then((itemRes) => {
+            res.send({ data: itemRes });
+          })
+          .catch((err) => {
+            console.error(err);
+            handleErrors(req, res, err);
+          });
+      }
     })
 
     .catch((err) => {
+      console.error(err);
       handleErrors(req, res, err);
     });
 };

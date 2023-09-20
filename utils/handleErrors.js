@@ -7,7 +7,7 @@ const {
   ERROR_500,
 } = require("./errors");
 
-const handleErrors = (err, res) => {
+const handleErrors = (req, res, err) => {
   if (err.name === "ValidationError" || err.name === "CastError") {
     return res.status(ERROR_400).send({ message: "invalid user" });
   }
@@ -20,10 +20,7 @@ const handleErrors = (err, res) => {
   if (err.name === "DuplicateError") {
     return res.status(ERROR_409).send({ message: "email already exists" });
   }
-  if (
-    err.message === "incorrect email or password" ||
-    err.message.includes("data and hash")
-  ) {
+  if (err.message === "incorrect email or password") {
     return res
       .status(ERROR_401)
       .send({ message: "incorrect email or password" });
