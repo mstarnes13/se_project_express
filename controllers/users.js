@@ -8,22 +8,27 @@ const { ERROR_404 } = require("../utils/errors");
 
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
-  User.findOne({ email }).then((emailFound) => {
-    if (emailFound) {
-      res.status(ERROR_409).send({ message: "User already exists" });
-    } else {
-      bcrypt
-        .hash(password, 10)
-        .then((hash) => User.create({ name, avatar, email, password: hash }))
-        .then((user) => {
-          res.send({ name, avatar, email, _id: user._id });
-        })
-        .catch((err) => {
-          console.error(err, "console error for createUser");
-          handleErrors(req, res, err);
-        });
-    }
-  });
+  User.findOne({ email })
+    .then((emailFound) => {
+      if (emailFound) {
+        res.status(ERROR_409).send({ message: "User already exists" });
+      } else {
+        bcrypt
+          .hash(password, 10)
+          .then((hash) => User.create({ name, avatar, email, password: hash }))
+          .then((user) => {
+            res.send({ name, avatar, email, _id: user._id });
+          })
+          .catch((err) => {
+            console.error(err, "console error for createUser");
+            handleErrors(req, res, err);
+          });
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      handleError(req, res, err);
+    });
 };
 
 const login = (req, res) => {
@@ -48,7 +53,7 @@ const getCurrentUser = (req, res) => {
   User.findById(userId)
     .then((user) => {
       if (!user) {
-        res.status(ERROR_404).send({ message: "User not found" });
+        return res.status(ERROR_404).send({ message: "User not found" });
       }
       return res.send(user);
     })
